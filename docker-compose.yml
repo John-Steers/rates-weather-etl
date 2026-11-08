@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment: {POSTGRES_USER: portfolio, POSTGRES_PASSWORD: portfolio, POSTGRES_DB: rates_weather}
+    ports: ["5433:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portfolio -d rates_weather"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  app:
+    build: .
+    env_file: .env
+    depends_on:
+      db: {condition: service_healthy}
+    command: ["python", "-m", "app.main", "--days", "3"]
